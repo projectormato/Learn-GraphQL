@@ -70,3 +70,81 @@ query{
 
 バックエンド側で分析したりボトルネック探したりするの便利、  
 スキーマ定義しておくとモックサーバみたいなのをそれで立てればサーバ側が準備出来てなくてもクライアント側でテスト出来るから良い感じ。
+
+
+## コアコンセプト
+types(型？)を定義する方法とqueries and mutations(クエリと変化、変更？)を送信するための構文
+
+
+### The Schema Definition Language (SDL)
+APIのスキーマを定義するための言語、SDLがあります！(独自のもの)
+* 型の定義
+```
+type Person {
+    name: String!
+    age: Int!
+}
+```
+!マークは必須の属性
+* 関係性があるとき    
+1対1
+```
+type Post {
+    title: String!
+    author: Person!
+}
+```
+1対多
+```
+type Person {
+    name: String!
+    age: Int!
+    posts: [Post!]!
+}
+```
+* データの取得
+```
+{
+    allPersons {
+      name
+    }
+}
+```
+基本こんな感じ。sandboxがあるのでそっちで色々試す。
+* データの作成
+```
+mutation {
+    createPerson(name: "Bob", age: 36) {
+      name
+      age
+    }
+}
+```
+* データの削除
+```
+mutation {
+    deletePerson(id:"cjlz8ocve06xk01572e9ncod1"){
+      name
+      age
+    }
+}
+```
+* データの更新
+```
+mutation {
+    updatePerson(id:"cjlz9ewpq0es80190iyyvydvs", name: "Hey", age: 40) {
+      name
+      age
+    }
+}
+```
+* リアルタイム更新(変更の購読)
+```
+subscription {
+    newPerson {
+      name
+      age
+    }
+}
+```
+[Learn More](https://www.prisma.io/blog/graphql-server-basics-the-schema-ac5e2950214e/)
