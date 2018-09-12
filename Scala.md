@@ -1,0 +1,137 @@
+# GraphQL Scala Tutorial
+
+## Introduction
+
+### What is a GraphQL Server?
+```
+{  "query": "query { allLinks { url } }" }
+```
+こういうのがきたら
+```
+{ "data": { "allLinks": { "url": "http://graphql.org/" } } }
+```
+こういうのを返すやつやで  
+検証しておかしかったら
+```
+{
+  "errors": [{
+    "message": "Cannot query field \"unknown\" on type \"Link\"."
+  }]
+}
+```
+こういうのを返すよね。
+
+### Schema-Driven Development
+最初にスキーマをフロントとバックで決めておけば素早く効率的に作業できるね。以下手順
+1. types(型？)と適切なqueries and mutations(クエリと操作？)を定義する
+2. それらのクエリを実行するためのリゾルバ関数を実装する
+3. 新しい要件が必要になったら手順1に戻ってスキーマを更新して、また繰り返す
+
+### Goal of the tutorial
+どのチュートリアルでも大体同じみたいだけど、以下のスキーマをサポートするサーバを作成することがこのチュートリアルの目標です。
+```
+type Query {
+  allLinks(filter: LinkFilter, orderBy: LinkOrderBy, skip: Int, first: Int): [Link!]!
+  _allLinksMeta: _QueryMeta!
+}
+
+type Mutation {
+  signinUser(email: AUTH_PROVIDER_EMAIL): SigninPayload!
+  createUser(name: String!, authProvider: AuthProviderSignupData!): User
+  createLink(description: String!, url: String!, postedById: ID): Link
+  createVote(linkId: ID, userId: ID): Vote
+}
+
+type Subscription {
+  Link(filter: LinkSubscriptionFilter): LinkSubscriptionPayload
+  Vote(filter: VoteSubscriptionFilter): VoteSubscriptionPayload
+}
+
+interface Node {
+  id: ID!
+}
+
+type User implements Node {
+  id: ID! @isUnique
+  createdAt: DateTime!
+  name: String!
+  links: [Link!]! @relation(name: "UsersLinks")
+  votes: [Vote!]! @relation(name: "UsersVotes")
+  email: String @isUnique
+  password: String
+}
+
+type Link implements Node {
+  id: ID! @isUnique
+  createdAt: DateTime!
+  url: String!
+  description: String!
+  postedBy: User! @relation(name: "UsersLinks")
+  votes: [Vote!]! @relation(name: "VotesOnLink")
+}
+
+type Vote implements Node {
+  id: ID! @isUnique
+  createdAt: DateTime!
+  user: User! @relation(name: "UsersVotes")
+  link: Link! @relation(name: "VotesOnLink")
+}
+
+input AuthProviderSignupData {
+  email: AUTH_PROVIDER_EMAIL
+}
+
+input AUTH_PROVIDER_EMAIL {
+  email: String!
+  password: String!
+}
+
+input LinkSubscriptionFilter {
+  mutation_in: [_ModelMutationType!]
+}
+
+input VoteSubscriptionFilter {
+  mutation_in: [_ModelMutationType!]
+}
+
+input LinkFilter {
+  OR: [LinkFilter!]
+  description_contains: String
+  url_contains: String
+}
+
+type SigninPayload {
+  token: String
+  user: User
+}
+
+type LinkSubscriptionPayload {
+  mutation: _ModelMutationType!
+  node: Link
+  updatedFields: [String!]
+}
+
+type VoteSubscriptionPayload {
+  mutation: _ModelMutationType!
+  node: Vote
+  updatedFields: [String!]
+}
+
+enum LinkOrderBy {
+  createdAt_ASC
+  createdAt_DESC
+}
+
+enum _ModelMutationType {
+  CREATED
+  UPDATED
+  DELETED
+}
+
+type _QueryMeta {
+  count: Int!
+}
+
+scalar DateTime
+```
+長い。
