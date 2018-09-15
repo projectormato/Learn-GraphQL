@@ -53,8 +53,21 @@ object DBSchema {
 
   val Users = TableQuery[UsersTable]
 
+  class VotesTable(tag: Tag) extends Table[Vote](tag, "VOTES"){
+    def id = column[Int]("ID", O.PrimaryKey, O.AutoInc)
+    def userId = column[Int]("USER_ID")
+    def linkId = column[Int]("LINK_ID")
+    def createdAt = column[DateTime]("CREATED_AT")
+
+    def * = (id, userId, linkId, createdAt).mapTo[Vote]
+  }
+
+  val Votes = TableQuery[VotesTable]
+
   val databaseSetup = DBIO.seq(
       Links.schema.create,
+      Users.schema.create,
+      Votes.schema.create,
 
       // change "Deferred Resolvers" chapter
       Links forceInsertAll Seq(
@@ -63,10 +76,16 @@ object DBSchema {
           Link(3, "https://facebook.github.io/graphql/", "GraphQL specification",DateTime(2017,10,2))
       ),
 
-      Users.schema.create,
       Users forceInsertAll Seq(
         User(1, "mario", "mario@example.com", "s3cr3t"),
         User(2, "Fred", "fred@flinstones.com", "wilmalove")
+      ),
+
+      Votes forceInsertAll Seq(
+        Vote(id = 1, userId = 1, linkId = 1),
+        Vote(id = 2, userId = 1, linkId = 2),
+        Vote(id = 3, userId = 1, linkId = 3),
+        Vote(id = 4, userId = 2, linkId = 2)
       )
   )
 

@@ -4,6 +4,7 @@ import slick.jdbc.H2Profile.api._
 // add "Handling Arguments" chapter
 import com.howtographql.scala.sangria.models.Link
 import com.howtographql.scala.sangria.models.User
+import com.howtographql.scala.sangria.models.Vote
 import scala.concurrent.Future
 
 class DAO(db: Database) {
@@ -21,6 +22,12 @@ class DAO(db: Database) {
    def getUsers(ids: Seq[Int]): Future[Seq[User]] = {
      db.run(
        Users.filter(_.id inSet ids).result
+     )
+   }
+
+   def getVotes(ids: Seq[Int]): Future[Seq[Vote]] = {
+     db.run(
+       Votes.filter(_.id inSet ids).result
      )
    }
 }

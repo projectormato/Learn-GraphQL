@@ -50,7 +50,15 @@ object GraphQLSchema {
       (ctx: MyContext, ids: Seq[Int]) => ctx.dao.getUsers(ids)
     )// resolver
 
-  val Resolver = DeferredResolver.fetchers(linksFetcher, usersFetcher)
+  implicit val VoteType = deriveObjectType[Unit, Vote]()
+  implicit val voteHasId = HasId[Vote, Int](_.id)
+
+  val votesFetcher = Fetcher(
+    (ctx: MyContext, ids: Seq[Int]) => ctx.dao.getVotes(ids)
+  )
+
+  // val Resolver = DeferredResolver.fetchers(linksFetcher)
+  val Resolver = DeferredResolver.fetchers(linksFetcher, usersFetcher, votesFetcher)
 
   val Id = Argument("id", IntType)
   val Ids = Argument("ids", ListInputType(IntType))
@@ -75,6 +83,11 @@ object GraphQLSchema {
               ListType(UserType),
               arguments = List(Ids),
               resolve = c => usersFetcher.deferSeq(c.arg(Ids))
+      ),
+      Field("votes",
+              ListType(VoteType),
+              arguments = List(Ids),
+              resolve = c => votesFetcher.deferSeq(c.arg(Ids))
       )
     )
   )
