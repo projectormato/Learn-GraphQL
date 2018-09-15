@@ -2,9 +2,7 @@ package com.howtographql.scala.sangria
 import DBSchema._
 import slick.jdbc.H2Profile.api._
 // add "Handling Arguments" chapter
-import com.howtographql.scala.sangria.models.Link
-import com.howtographql.scala.sangria.models.User
-import com.howtographql.scala.sangria.models.Vote
+import com.howtographql.scala.sangria.models.{Link, User, Vote}
 import scala.concurrent.Future
 
 class DAO(db: Database) {
