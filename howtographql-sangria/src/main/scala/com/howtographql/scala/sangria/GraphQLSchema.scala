@@ -33,25 +33,37 @@ object GraphQLSchema {
     }
   )
 
+  val IdentifiableType = InterfaceType(
+    "Identifiable",
+    fields[Unit, Identifiable](
+      Field("id", IntType, resolve = _.value.id)
+    )
+  )
+
   // implicit val LinkType = deriveObjectType[Unit, Link]()
   val LinkType = deriveObjectType[Unit, Link](
+      Interfaces(IdentifiableType),
       ReplaceField("createdAt", Field("createdAt", GraphQLDateTime, resolve = _.value.createdAt))
     )
 
   // add "Deferred Resolvers" chapter
-  implicit val linkHasId = HasId[Link, Int](_.id)
+  // implicit val linkHasId = HasId[Link, Int](_.id)
   val linksFetcher = Fetcher(
       (ctx: MyContext, ids: Seq[Int]) => ctx.dao.getLinks(ids)
     )
 
-  val UserType = deriveObjectType[Unit, User]() //ObjectType for user
-  implicit val userHasId = HasId[User, Int](_.id) //HasId type class
+  val UserType = deriveObjectType[Unit, User](
+    Interfaces(IdentifiableType)
+  ) //ObjectType for user
+  // implicit val userHasId = HasId[User, Int](_.id) //HasId type class
   val usersFetcher = Fetcher(
       (ctx: MyContext, ids: Seq[Int]) => ctx.dao.getUsers(ids)
     )// resolver
 
-  implicit val VoteType = deriveObjectType[Unit, Vote]()
-  implicit val voteHasId = HasId[Vote, Int](_.id)
+  implicit val VoteType = deriveObjectType[Unit, Vote](
+    Interfaces(IdentifiableType)
+  )
+  // implicit val voteHasId = HasId[Vote, Int](_.id)
 
   val votesFetcher = Fetcher(
     (ctx: MyContext, ids: Seq[Int]) => ctx.dao.getVotes(ids)
