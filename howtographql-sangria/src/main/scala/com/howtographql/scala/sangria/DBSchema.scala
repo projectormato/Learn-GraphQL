@@ -26,7 +26,6 @@ object DBSchema {
   )
 
   // add "The first query" chapter
-  //1
   class LinksTable(tag: Tag) extends Table[Link](tag, "LINKS"){
 
       def id = column[Int]("ID", O.PrimaryKey, O.AutoInc)
@@ -39,11 +38,21 @@ object DBSchema {
       // def * = (id, url, description).mapTo[Link]
 
   }
-
-  //2
   val Links = TableQuery[LinksTable]
 
-  //3
+  // add "Interfaces" chapter
+  class UsersTable(tag: Tag) extends Table[User](tag, "USERS"){
+    def id = column[Int]("ID", O.PrimaryKey, O.AutoInc)
+    def name = column[String]("NAME")
+    def email = column[String]("EMAIL")
+    def password = column[String]("PASSWORD")
+    def createdAt = column[DateTime]("CREATED_AT")
+
+    def * = (id, name, email, password, createdAt).mapTo[User]
+  }
+
+  val Users = TableQuery[UsersTable]
+
   val databaseSetup = DBIO.seq(
       Links.schema.create,
 
@@ -52,6 +61,12 @@ object DBSchema {
           Link(1, "http://howtographql.com", "Awesome community driven GraphQL tutorial", DateTime(2017,9,12)),
           Link(2, "http://graphql.org", "Official GraphQL web page",DateTime(2017,10,1)),
           Link(3, "https://facebook.github.io/graphql/", "GraphQL specification",DateTime(2017,10,2))
+      ),
+
+      Users.schema.create,
+      Users forceInsertAll Seq(
+        User(1, "mario", "mario@example.com", "s3cr3t"),
+        User(2, "Fred", "fred@flinstones.com", "wilmalove")
       )
   )
 
