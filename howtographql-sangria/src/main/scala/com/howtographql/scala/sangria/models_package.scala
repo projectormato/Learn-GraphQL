@@ -13,7 +13,7 @@ package object models {
   }
   // case class Link(id: Int, url: String, description: String)
   // modify "Custom Scalars" chapter
-  case class Link(id: Int, url: String, description: String, createdAt: DateTime) extends Identifiable
+  case class Link(id: Int, url: String, description: String, postedBy: Int, createdAt: DateTime = DateTime.now) extends Identifiable
 
   // add "Interfaces" chapter
   case class User(id: Int, name: String, email: String, password: String, createdAt: DateTime = DateTime.now) extends Identifiable
