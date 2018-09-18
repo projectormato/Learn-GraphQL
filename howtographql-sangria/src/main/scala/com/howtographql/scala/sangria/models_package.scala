@@ -12,7 +12,6 @@ package object models {
   object Identifiable {
       implicit def hasId[T <: Identifiable]: HasId[T, Int] = HasId(_.id)
   }
-  // case class Link(id: Int, url: String, description: String)
   // modify "Custom Scalars" chapter
   case class Link(id: Int, url: String, description: String, postedBy: Int, createdAt: DateTime = DateTime.now) extends Identifiable
 

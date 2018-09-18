@@ -39,8 +39,6 @@ object DBSchema {
 
       def * = (id, url, description, postedBy, createdAt).mapTo[Link]
       def postedByFK = foreignKey("postedBy_FK", postedBy, Users)(_.id)
-      // def * = (id, url, description, createdAt).mapTo[Link]
-      // def * = (id, url, description).mapTo[Link]
 
   }
   val Links = TableQuery[LinksTable]
@@ -71,9 +69,6 @@ object DBSchema {
 
   val Votes = TableQuery[VotesTable]
 
-  /**
-    * Load schema and populate sample data within this Sequence od DBActions
-    */
   val databaseSetup = DBIO.seq(
     Users.schema.create,
     Links.schema.create,

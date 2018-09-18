@@ -6,10 +6,6 @@ import sangria.schema._
 import sangria.macros.derive._
 
 // add "Deferred Resolvers" chapter
-// import sangria.execution.deferred.Fetcher
-// import sangria.execution.deferred.DeferredResolver
-// import sangria.execution.deferred.HasId
-// 上のimportをまとめてimport
 import sangria.execution.deferred.{DeferredResolver, Fetcher, HasId}
 
 // add "Custom Scalars" chapter
