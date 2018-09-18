@@ -12,6 +12,8 @@ import sangria.ast.Document
 import sangria.execution._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import sangria.marshalling.sprayJson._
+import com.howtographql.scala.sangria.models.{AuthenticationException, AuthorizationException}
+import sangria.execution.{ExceptionHandler => EHandler, _}
 
 
 object GraphQLServer {
@@ -27,6 +29,7 @@ object GraphQLServer {
 
     // 4
     val JsString(query) = fields("query")
+
 
     // 5
     QueryParser.parse(query) match {
@@ -48,21 +51,27 @@ object GraphQLServer {
     }
 
   }
+  // add "Authentication" chapter
+  val ErrorHandler = EHandler {
+    case (_, AuthenticationException(message)) ⇒ HandledException(message)
+    case (_, AuthorizationException(message)) ⇒ HandledException(message)
+  }
 
   private def executeGraphQLQuery(query: Document, operation: Option[String], vars: JsObject)(implicit ec: ExecutionContext) = {
     // 9
     Executor.execute(
-    GraphQLSchema.SchemaDefinition,
-    query,
-    MyContext(dao),
-    variables = vars,
-    operationName = operation,
-    deferredResolver = GraphQLSchema.Resolver
+      GraphQLSchema.SchemaDefinition,
+      query,
+      MyContext(dao),
+      variables = vars,
+      operationName = operation,
+      deferredResolver = GraphQLSchema.Resolver,
+      exceptionHandler = ErrorHandler,
+      middleware = AuthMiddleware :: Nil
     ).map(OK -> _)
       .recover {
-      case error: QueryAnalysisError => BadRequest -> error.resolveError
-      case error: ErrorWithResolver => InternalServerError -> error.resolveError
+        case error: QueryAnalysisError => BadRequest -> error.resolveError
+        case error: ErrorWithResolver => InternalServerError -> error.resolveError
     }
   }
-
 }
